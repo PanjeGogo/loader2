@@ -531,28 +531,34 @@ end)
 
 local function fail(msg)
     setAccent(T.red)
-    statusLabel.TextColor3 = T.red
-    statusLabel.Font = Enum.Font.RobotoMono
-    statusLabel.TextSize = S(18)
-    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-    statusLabel.TextYAlignment = Enum.TextYAlignment.Top
-    statusLabel.TextWrapped = true
-    statusLabel.TextTruncate = Enum.TextTruncate.None
-    statusLabel.ClipsDescendants = true
-    statusLabel.Position = UDim2.fromOffset(0, Y_STATUS)
-    statusLabel.Size = UDim2.new(1, -S(8), 0, S(150))
-    statusLabel.Text = tostring(msg)
 
-    -- Hide progress elements so they cannot overlap the error details.
-    track.Visible = false
-    bar.Visible = false
-    barGlow.Visible = false
-    pctLabel.Visible = false
+    -- Remove the progress UI completely; it must never overlap error text.
+    pcall(function() track:Destroy() end)
+    pcall(function() bar:Destroy() end)
+    pcall(function() pctLabel:Destroy() end)
+    pcall(function() statusLabel:Destroy() end)
+
+    local errorLabel = Instance.new("TextLabel")
+    errorLabel.Name = "RuntimeErrorDetails"
+    errorLabel.BackgroundTransparency = 1
+    errorLabel.Position = UDim2.fromOffset(0, Y_KEY + ROW_H + S(20))
+    errorLabel.Size = UDim2.new(1, -S(12), 0, S(190))
+    errorLabel.Font = Enum.Font.RobotoMono
+    errorLabel.TextSize = S(18)
+    errorLabel.TextColor3 = T.red
+    errorLabel.TextXAlignment = Enum.TextXAlignment.Left
+    errorLabel.TextYAlignment = Enum.TextYAlignment.Top
+    errorLabel.TextWrapped = true
+    errorLabel.TextTruncate = Enum.TextTruncate.None
+    errorLabel.ClipsDescendants = true
+    errorLabel.ZIndex = 100
+    errorLabel.Text = tostring(msg)
+    errorLabel.Parent = card
 
     tw(card, {
-        Size = sz(PAD_TOP + Y_STATUS + S(150) + PAD_BOT)
+        Size = sz(PAD_TOP + Y_KEY + ROW_H + S(20) + S(190) + PAD_BOT)
     }, EASE)
-    task.delay(25, dismiss)
+    task.delay(30, dismiss)
 end
 
 local function unsupported()
