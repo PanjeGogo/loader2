@@ -11212,15 +11212,27 @@ do
         end
 
         State.Sell._selling = true
-        local farmWasActive = State.AutoFarm.active
+
+        -- AutoFarm normally locks the character at the dig/wash position.
+        -- Release that lock before travelling to a merchant, otherwise the
+        -- sell movement can fight the farming position lock.
+        if State.AutoFarm.locked then
+            CharacterLock.unlock()
+            State.AutoFarm.locked = false
+        end
+
         local sellOK, sold = pcall(function()
             return SellModule.sell({}, State.Sell.mode or "Teleport")
         end)
+
         State.Sell._selling = false
 
         if sellOK and sold then
             State.Sell._lastSell = os.clock()
             State.Sell._scheduledSell = false
+
+            -- Let the inventory UI/remotes update. The normal AutoFarm loop
+            -- will then travel back to the configured dig/wash positions.
             task.wait(0.75)
             return true
         end
