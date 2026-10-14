@@ -532,31 +532,22 @@ end)
 local function fail(msg)
     setAccent(T.red)
     statusLabel.TextColor3 = T.red
-    statusLabel.Text = "Runtime error"
-    
-    local errorLabel = Instance.new("TextLabel")
-    errorLabel.Name = "ErrorDetails"
-    errorLabel.BackgroundTransparency = 1
-    errorLabel.Position = UDim2.fromOffset(0, Y_BAR + BAR_H + S(12))
-    errorLabel.Size = UDim2.new(1, 0, 0, S(100))
-    errorLabel.Font = Enum.Font.RobotoMono
-    errorLabel.TextSize = S(18)
-    errorLabel.TextColor3 = T.red
-    errorLabel.TextXAlignment = Enum.TextXAlignment.Left
-    errorLabel.TextYAlignment = Enum.TextYAlignment.Top
-    errorLabel.TextWrapped = true
-    errorLabel.TextTruncate = Enum.TextTruncate.None
-    errorLabel.Text = tostring(msg)
-    errorLabel.Parent = card
-    
+    statusLabel.Font = Enum.Font.RobotoMono
+    statusLabel.TextSize = S(18)
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statusLabel.TextYAlignment = Enum.TextYAlignment.Top
+    statusLabel.TextWrapped = true
+    statusLabel.TextTruncate = Enum.TextTruncate.None
+    statusLabel.Position = UDim2.fromOffset(0, Y_STATUS)
+    statusLabel.Size = UDim2.new(1, -S(8), 0, S(100))
+    statusLabel.Text = tostring(msg)
+    pctLabel.Text = "ERR"
+    pctLabel.TextSize = S(18)
+    pctLabel.TextColor3 = T.red
     tw(card, {
-        Size = sz(H_FULL + S(112))
+        Size = sz(H_FULL + S(105))
     }, EASE)
-    errorLabel.TextTransparency = 1
-    tw(errorLabel, {
-        TextTransparency = 0
-    }, SOFT)
-    task.delay(12, dismiss)
+    task.delay(20, dismiss)
 end
 
 local function unsupported()
@@ -719,7 +710,7 @@ local function run()
     setProgress(0.94, "Executing")
     local ok, err = pcall(main)
     if not ok then
-        fail("Runtime error: " .. tostring(err))
+        fail("Runtime error:\n" .. tostring(err))
         return
     end
 
