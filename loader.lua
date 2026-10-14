@@ -532,8 +532,31 @@ end)
 local function fail(msg)
     setAccent(T.red)
     statusLabel.TextColor3 = T.red
-    statusLabel.Text = msg
-    task.delay(2.5, dismiss)
+    statusLabel.Text = "Runtime error"
+    
+    local errorLabel = Instance.new("TextLabel")
+    errorLabel.Name = "ErrorDetails"
+    errorLabel.BackgroundTransparency = 1
+    errorLabel.Position = UDim2.fromOffset(0, Y_BAR + BAR_H + S(12))
+    errorLabel.Size = UDim2.new(1, 0, 0, S(100))
+    errorLabel.Font = Enum.Font.RobotoMono
+    errorLabel.TextSize = S(18)
+    errorLabel.TextColor3 = T.red
+    errorLabel.TextXAlignment = Enum.TextXAlignment.Left
+    errorLabel.TextYAlignment = Enum.TextYAlignment.Top
+    errorLabel.TextWrapped = true
+    errorLabel.TextTruncate = Enum.TextTruncate.None
+    errorLabel.Text = tostring(msg)
+    errorLabel.Parent = card
+    
+    tw(card, {
+        Size = sz(H_FULL + S(112))
+    }, EASE)
+    errorLabel.TextTransparency = 1
+    tw(errorLabel, {
+        TextTransparency = 0
+    }, SOFT)
+    task.delay(12, dismiss)
 end
 
 local function unsupported()
@@ -694,9 +717,9 @@ local function run()
     end
 
     setProgress(0.94, "Executing")
-    local ok = pcall(main)
+    local ok, err = pcall(main)
     if not ok then
-        fail("Runtime error")
+        fail("Runtime error: " .. tostring(err))
         return
     end
 
