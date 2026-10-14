@@ -11371,16 +11371,24 @@ do
                                     if panStatus.isFull then
                                         if not AutoFarmModule.performTask("MovingToWater", "WashPan",
                                             State.AutoFarm.waterCFrame, "Wash", "Water") then
-                                            if not State.AutoFarm.interrupted then
-                                                State.AutoFarm.active = false
+                                            -- A transient movement/action failure should not permanently
+                                            -- kill AutoFarm (notably just after the selling routine).
+                                            if State.AutoFarm.locked then
+                                                CharacterLock.unlock()
+                                                State.AutoFarm.locked = false
                                             end
+                                            task.wait(0.25)
                                         end
                                     else
                                         if not AutoFarmModule.performTask("MovingToSand", "DigSand",
                                             State.AutoFarm.sandCFrame, "Dig", "Deposit") then
-                                            if not State.AutoFarm.interrupted then
-                                                State.AutoFarm.active = false
+                                            -- Keep retrying the dig cycle instead of leaving the player
+                                            -- standing idle after one failed action.
+                                            if State.AutoFarm.locked then
+                                                CharacterLock.unlock()
+                                                State.AutoFarm.locked = false
                                             end
+                                            task.wait(0.25)
                                         end
                                     end
                                 end)
