@@ -196,7 +196,7 @@ local function registerModule(storage, name, mod)
     data.Prereqs[proxy] = true
 end
 
-local W = S(440)
+local W = S(700)
 local PAD = S(26)
 local PAD_TOP = S(30)
 local PAD_BOT = S(22)
