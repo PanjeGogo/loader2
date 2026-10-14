@@ -703,25 +703,74 @@ local function run()
         return
     end
 
-    setProgress(0.08, "Connecting")
-    subLabel.Text = "Loading Prospecting..."
+    setProgress(0.08, "Loading config")
+    local cfgRaw = fetch("config.json")
+    if not cfgRaw then
+        fail("Config not found")
+        return
+    end
+
+    setProgress(0.14, "Parsing config")
+    local okCfg, cfg = pcall(HttpServ.JSONDecode, HttpServ, cfgRaw)
+    if not okCfg or type(cfg) ~= "table" then
+        fail("Invalid config.json")
+        return
+    end
+
+    local mods = {}
+    local rawList = cfg.prerequisites
+    if type(rawList) == "table" then
+        if #rawList > 0 then
+            for _, value in ipairs(rawList) do
+                if type(value) == "string" then
+                    local name = value:match("([^/]+)%.lua$") or value
+                    mods[name] = value:find("/") and value or ("utils/" .. value .. ".lua")
+                end
+            end
+        else
+            mods = rawList
+        end
+    end
+
+    local total = tableLen(mods)
+    local loaded = 0
+    for name, path in pairs(mods) do
+        if type(name) ~= "string" or type(path) ~= "string" then
+            fail("Invalid prerequisite config")
+            return
+        end
+
+        local fullPath = path:match("^utils/") and path or ("utils/" .. path)
+        setProgress(0.18 + (loaded / math.max(total, 1)) * 0.54, "Loading " .. name)
+
+        local mod = fetchModule(fullPath)
+        if not mod then
+            fail("Failed prerequisite: " .. name)
+            return
+        end
+
+        registerModule(storage, name, mod)
+        loaded = loaded + 1
+        task.wait(0.05)
+    end
+
+    setProgress(0.76, "Loading Prospecting")
     local mainSrc = fetch(GAME_FILE)
     if not mainSrc then
         fail("Prospecting not found")
         return
     end
 
-    setProgress(0.76, "Loading")
     local main = loadstring(mainSrc)
     if not main then
-        fail("Compile error")
+        fail("Compile error in Prospecting")
         return
     end
 
     setProgress(0.94, "Executing")
     local ok, err = pcall(main)
     if not ok then
-        fail("Runtime error:\n" .. tostring(err))
+        fail("Runtime error:\\n" .. tostring(err))
         return
     end
 
