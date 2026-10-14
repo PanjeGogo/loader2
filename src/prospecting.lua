@@ -11191,8 +11191,8 @@ do
     end
 
     function AutoFarmModule.checkAndDoSell()
-        if not State.Sell.autoSell then
-            return
+        if not State.Sell.autoSell or State.Sell._selling then
+            return false
         end
 
         local shouldSell = false
@@ -11204,20 +11204,28 @@ do
             shouldSell = SellModule.getInventoryCount() >= (tonumber(State.Sell.threshold) or 50)
         elseif mode == "Duration" then
             shouldSell = State.Sell._scheduledSell or
-                             (os.clock() - (State.Sell._lastSell or 0) >= (tonumber(State.Sell.delay) or 300))
+                (os.clock() - (State.Sell._lastSell or 0) >= (tonumber(State.Sell.delay) or 300))
         end
 
-        if shouldSell then
-            if SellModule.sell({}, State.Sell.mode or "Teleport") then
-                State.Sell._lastSell = os.clock()
-                State.Sell._scheduledSell = false
-
-                if Player and Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-                    CharacterLock.lock(Player.Character.HumanoidRootPart.CFrame)
-                    State.AutoFarm.locked = true
-                end
-            end
+        if not shouldSell then
+            return false
         end
+
+        State.Sell._selling = true
+        local farmWasActive = State.AutoFarm.active
+        local sellOK, sold = pcall(function()
+            return SellModule.sell({}, State.Sell.mode or "Teleport")
+        end)
+        State.Sell._selling = false
+
+        if sellOK and sold then
+            State.Sell._lastSell = os.clock()
+            State.Sell._scheduledSell = false
+            task.wait(0.75)
+            return true
+        end
+
+        return false
     end
 
     function AutoFarmModule.teardown()
