@@ -538,16 +538,21 @@ local function fail(msg)
     statusLabel.TextYAlignment = Enum.TextYAlignment.Top
     statusLabel.TextWrapped = true
     statusLabel.TextTruncate = Enum.TextTruncate.None
+    statusLabel.ClipsDescendants = true
     statusLabel.Position = UDim2.fromOffset(0, Y_STATUS)
-    statusLabel.Size = UDim2.new(1, -S(8), 0, S(100))
+    statusLabel.Size = UDim2.new(1, -S(8), 0, S(150))
     statusLabel.Text = tostring(msg)
-    pctLabel.Text = "ERR"
-    pctLabel.TextSize = S(18)
-    pctLabel.TextColor3 = T.red
+
+    -- Hide progress elements so they cannot overlap the error details.
+    track.Visible = false
+    bar.Visible = false
+    barGlow.Visible = false
+    pctLabel.Visible = false
+
     tw(card, {
-        Size = sz(H_FULL + S(105))
+        Size = sz(PAD_TOP + Y_STATUS + S(150) + PAD_BOT)
     }, EASE)
-    task.delay(20, dismiss)
+    task.delay(25, dismiss)
 end
 
 local function unsupported()
