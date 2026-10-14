@@ -3916,8 +3916,8 @@ do
             local Accent = TypeColors[Config.Type] or Config.Color or Theme.Accent
             local LightAccent = Accent:Lerp(Color3.new(1, 1, 1), 0.4)
             local TagText = Config.Tag or TypeTags[Config.Type] or "NOTICE"
-            local BasePad = IsMobile and 8 or 10
-            local SidePad = IsMobile and 10 or 12
+            local BasePad = (IsMobile and 8 or 10) * 2
+            local SidePad = (IsMobile and 10 or 12) * 2
 
             local Notification = SimpleUI.Utility:CreateInstance("Frame", {
                 Name = SimpleUI.Utility:GenerateId(),
@@ -3932,7 +3932,7 @@ do
 
             local AccentBar = SimpleUI.Utility:CreateInstance("Frame", {
                 Name = SimpleUI.Utility:GenerateId(),
-                Size = UDim2.new(0, 3, 1, 0),
+                Size = UDim2.new(0, 6, 1, 0),
                 BackgroundColor3 = Accent,
                 BackgroundTransparency = 1,
                 BorderSizePixel = 0,
@@ -3955,8 +3955,8 @@ do
 
             local Content = SimpleUI.Utility:CreateInstance("Frame", {
                 Name = SimpleUI.Utility:GenerateId(),
-                Position = UDim2.new(0, 3, 0, 0),
-                Size = UDim2.new(1, -3, 1, 0),
+                Position = UDim2.new(0, 6, 0, 0),
+                Size = UDim2.new(1, -6, 1, 0),
                 BackgroundTransparency = 1,
                 ZIndex = SimpleUI.Constants.ZIndex.Notification + 2
             }, Notification)
@@ -3978,12 +3978,12 @@ do
             SimpleUI.Utility:CreateInstance("UIListLayout", {
                 SortOrder = Enum.SortOrder.LayoutOrder,
                 VerticalAlignment = Enum.VerticalAlignment.Center,
-                Padding = UDim.new(0, IsMobile and 2 or 3)
+                Padding = UDim.new(0, (IsMobile and 2 or 3) * 2)
             }, TextContainer)
 
             local TitleRow = SimpleUI.Utility:CreateInstance("Frame", {
                 Name = SimpleUI.Utility:GenerateId(),
-                Size = UDim2.new(1, Config.Closable ~= false and -(IsMobile and 22 or 26) or 0, 0, 0),
+                Size = UDim2.new(1, Config.Closable ~= false and -((IsMobile and 22 or 26) * 2) or 0, 0, 0),
                 AutomaticSize = Enum.AutomaticSize.Y,
                 BackgroundTransparency = 1,
                 LayoutOrder = 1,
@@ -4005,7 +4005,7 @@ do
                 Text = Config.Title or "Notification",
                 TextColor3 = Theme.TextActive,
                 TextTransparency = 1,
-                TextSize = IsMobile and 12 or 13,
+                TextSize = (IsMobile and 12 or 13) * 2,
                 Font = Theme.FontPrimary,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextWrapped = false,
@@ -4024,7 +4024,7 @@ do
                 Text = TagText,
                 TextColor3 = LightAccent,
                 TextTransparency = 1,
-                TextSize = IsMobile and 8 or 9,
+                TextSize = (IsMobile and 8 or 9) * 2,
                 Font = Theme.FontPrimary,
                 TextXAlignment = Enum.TextXAlignment.Left,
                 LayoutOrder = 2,
@@ -4035,23 +4035,23 @@ do
                 CornerRadius = UDim.new(0, 3)
             }, Tag)
             SimpleUI.Utility:CreateInstance("UIPadding", {
-                PaddingLeft = UDim.new(0, 5),
-                PaddingRight = UDim.new(0, 5),
-                PaddingTop = UDim.new(0, 2),
-                PaddingBottom = UDim.new(0, 2)
+                PaddingLeft = UDim.new(0, 10),
+                PaddingRight = UDim.new(0, 10),
+                PaddingTop = UDim.new(0, 4),
+                PaddingBottom = UDim.new(0, 4)
             }, Tag)
 
             local DescriptionLabel = nil
             if Config.Description then
                 DescriptionLabel = SimpleUI.Utility:CreateInstance("TextLabel", {
                     Name = SimpleUI.Utility:GenerateId(),
-                    Size = UDim2.new(1, Config.Closable ~= false and -(IsMobile and 22 or 26) or 0, 0, 0),
+                    Size = UDim2.new(1, Config.Closable ~= false and -((IsMobile and 22 or 26) * 2) or 0, 0, 0),
                     AutomaticSize = Enum.AutomaticSize.Y,
                     BackgroundTransparency = 1,
                     Text = Config.Description,
                     TextColor3 = Theme.TextSecondary,
                     TextTransparency = 1,
-                    TextSize = IsMobile and 11 or 12,
+                    TextSize = (IsMobile and 11 or 12) * 2,
                     Font = Theme.FontSecondary,
                     TextXAlignment = Enum.TextXAlignment.Left,
                     TextWrapped = true,
@@ -4067,7 +4067,7 @@ do
                     Name = SimpleUI.Utility:GenerateId(),
                     Position = UDim2.new(1, 0, 0, 0),
                     AnchorPoint = Vector2.new(1, 0),
-                    Size = UDim2.new(0, IsMobile and 16 or 18, 0, IsMobile and 16 or 18),
+                    Size = UDim2.new(0, (IsMobile and 16 or 18) * 2, 0, (IsMobile and 16 or 18) * 2),
                     BackgroundTransparency = 1,
                     Text = "×",
                     Font = Theme.FontPrimary,
