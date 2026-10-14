@@ -11351,7 +11351,22 @@ do
                                         return
                                     end
 
-                                    AutoFarmModule.checkAndDoSell()
+                                    -- If an automatic sale starts/completes, skip this
+                                    -- iteration. Selling may teleport the player away from
+                                    -- the dig spot, so don't run a stale dig/wash action
+                                    -- using the inventory status captured before the sale.
+                                    if AutoFarmModule.checkAndDoSell() then
+                                        task.wait(0.1)
+                                        return
+                                    end
+
+                                    -- Re-read pan state after the sell check in case the
+                                    -- inventory changed while the sell routine was running.
+                                    panStatus = PanModule.getStatus()
+                                    if not panStatus then
+                                        task.wait(0.05)
+                                        return
+                                    end
 
                                     if panStatus.isFull then
                                         if not AutoFarmModule.performTask("MovingToWater", "WashPan",
