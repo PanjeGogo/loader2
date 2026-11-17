@@ -1,17 +1,50 @@
-# Throw Food for Animals — Loader Investigation
+# Throw Food for Animals — Mythios Loader Investigation
 
-**Status:** Partial research; the original Mythios `@freemium` payload has not been identified.
+**Status:** Client-side loader flow identified. The actual game-specific payload has not been recovered or matched to a public source.
 
 ## Target identity
 
 - Game: Throw Food for Animals
 - PlaceId: `120219252362013`
 - UniverseId / GameId: `10766972131`
-- Provider under investigation: Mythios
+- Provider: Mythios
 - Slug: `@freemium`
-- Previously observed host: `https://mythios.online`
+- Host: `https://mythios.online`
 
-Treat the IDs above as target identifiers from the investigation. Do not assume a public script using the same PlaceId is the Mythios payload.
+The IDs are target identifiers from the observed request. The decoded client reads the current PlaceId and GameId at runtime; it does not hardcode these target IDs.
+
+## Local source inspected
+
+A prior Library upload was found and read:
+
+- File: `Mythios_client_decoded.lua`
+- Size: 66,812 bytes
+- Length: 1,979 lines
+- Header says it was statically decoded from `client.txt`.
+- The source itself says it was not executed.
+
+This is the Mythios client/loader source, not the downloaded game-specific payload.
+
+## Client-side loader architecture
+
+The decoded client establishes:
+
+1. `SLUG="@freemium"` and `BASE="https://mythios.online"`.
+2. It reads `game.PlaceId` and `game.GameId` locally.
+3. It gathers client identity fields, including an executor HWID, a generated nonce, timestamp, and optional executor name.
+4. For `@freemium` / `@premium`, it first uses a combined request to `/api/start.php`.
+5. That request includes the script slug, key, HWID, nonce, timestamp, PlaceId, GameId, and optional executor name. Startup requests also include phase/UI flags.
+6. The expected response is a framed `MYTH1\n` response containing JSON game information, an authorization section, and a load section.
+7. The client validates the server response and access status. The payload is then checked for integrity, decoded/decrypted locally, compiled, and invoked.
+8. The client starts a separate heartbeat request after successful preparation.
+
+If the combined startup response does not contain usable game information, the client falls back to `/api/loader-info.php?place_id=...`. The older staged flow uses `/api/auth.php` and `/api/load.php` when the combined flow is not used or cannot be used.
+
+### Important distinction
+
+The `/api/start.php` response is not necessarily just an authorization result: the client expects it to carry both authorization data and a load payload. In the combined flow, the load section is already present in that response. In the legacy flow, the client requests the load section separately from `/api/load.php`.
+
+The source contains cryptographic integrity and payload-protection logic. This report does not attempt to forge authorization data, derive access secrets, bypass key/HWID checks, or reconstruct a payload without authorized access.
 
 ## Repository inspected
 
@@ -34,7 +67,7 @@ The current `loader.lua`:
 
 The current `src/config.json` identifies the payload as Prospecting! v2.4 and lists `TaskManager` and `ShoppingMart` as prerequisites.
 
-**Conclusion:** the current files in this repository are not the captured Mythios loader and do not contain the Throw Food for Animals payload. No existing file was overwritten.
+**Conclusion:** the existing `loader.lua` and `src/` files are not the Mythios client and do not contain the Throw Food for Animals payload. No existing file was overwritten.
 
 ## Public-source leads found
 
@@ -58,18 +91,20 @@ These are leads for the same game, not proof of a relationship to Mythios.
 
 ## What remains unresolved
 
-- The actual Mythios `@freemium` payload URL or server-side route.
-- Whether Mythios returns a unique payload or a generic/third-party script.
-- Whether the previously captured `/api/start.php` response contains a next-stage URL or only an authorization/status response.
-- A source-level match between a candidate payload and Mythios.
+- The actual game-specific Lua/Luau source delivered in the `load` section of the Mythios response.
+- Whether Mythios uses a unique payload for this game or delegates to another source.
+- Whether the user's captured `/api/start.php` response contains a complete load section for an authorized session.
+- A source-level match between any public candidate and the Mythios payload.
 
 ## Next evidence needed
 
-Add the original captured Mythios `loader.lua` (not this repository's Prospecting loader) and sanitized HTTP request/response captures for the relevant requests. Remove session tokens, keys, HWIDs, cookies, and other credentials before committing. The investigation can then compare the observed delivery flow with the public leads without bypassing authentication or access controls.
+Provide a sanitized capture of the successful, authorized `/api/start.php` response or a permitted export of the payload. Remove keys, tokens, HWIDs, nonces, cookies, and other session credentials before sharing or committing. If the response contains only a rejection/status message, it cannot establish the payload source.
+
+The next comparison should be static and provenance-focused: compare any legitimately obtained payload's game-specific remotes, module paths, and UI/features with the public candidates. Do not execute untrusted downloaded Lua merely to inspect it.
 
 ## Safety and provenance notes
 
 - Do not forge keys, HWIDs, nonces, or authentication responses.
 - Do not bypass paid access or server-side authorization.
 - Do not label a third-party candidate as the Mythios original without direct evidence.
-- Do not execute untrusted downloaded Lua merely to inspect it; prefer static analysis.
+- Prefer static inspection of authorized source over executing downloaded code.
