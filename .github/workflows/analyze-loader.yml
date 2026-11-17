@@ -1,0 +1,33 @@
+name: Static Lua loader analysis
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/analyze-loader.yml"
+      - "tools/analyze_mythios_loader.py"
+      - "input/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run static analyzer
+        run: python tools/analyze_mythios_loader.py --input input/loader.lua --output analysis/loader-report.md
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythios-loader-analysis
+          path: analysis/loader-report.md
+          if-no-files-found: error
